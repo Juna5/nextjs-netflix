@@ -3,6 +3,7 @@ import Header from '../components/Header'
 import Banner  from '../components/Banner'
 import requests from '../utils/requests'
 import {Movie} from '../typings'
+import Row from '../components/Row'
 
 export async function getServerSideProps() {
   const [
@@ -51,6 +52,7 @@ interface Props {
 
 export default function Home({
   netflixOriginals,
+  trendingNow,
   topRated,
   actionMovies,
   comedyMovies,
@@ -68,13 +70,13 @@ export default function Home({
     <main className='relative pl-4 pb-24 lg:space-y-24 lg:pl-16'>
       <Banner netflixOriginals={netflixOriginals}/>
       <section>
-        {/* row */}
-        {/* row */}
-        {/* row */}
-        {/* row */}
-        {/* row */}
-        {/* row */}
-        {/* row */}
+        <Row title="Trending Now" movies={trendingNow}/>
+        <Row title="Top Rated" movies={topRated}/>
+        <Row title="Action Movies" movies={actionMovies}/>
+        <Row title="Comedy Movies" movies={comedyMovies}/>
+        <Row title="Horror Movies" movies={horrorMovies}/>
+        <Row title="Romance Movies" movies={romanceMovies}/>
+        <Row title="Documentar Movies" movies={documentaries}/>
       </section>
     </main>
    </div>
