@@ -1,8 +1,11 @@
 import Head from "next/head";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import useAuth from "../hooks/useAuth";
+import { auth } from "../firebash";
+import { onAuthStateChanged } from "firebase/auth";
+import { useRouter } from "next/router";
 
 interface Inputs {
     email: string;
@@ -17,6 +20,15 @@ export default function Login() {
         handleSubmit,
         formState: { errors },
     } = useForm<Inputs>();
+    const router = useRouter();
+
+    useEffect(() => {
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                router.push("/");
+            }
+        });
+    });
 
     const onSubmit: SubmitHandler<Inputs> = async ({ email, password }) => {
         if (login) {
