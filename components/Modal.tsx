@@ -17,7 +17,7 @@ function Modal() {
     const [showModal, setShowModal] = useRecoilState(modalState);
     const [movie, setMovie] = useRecoilState(movieState);
     const [trailer, setTrailer] = useState("");
-    const [genres, setGenres] = useState<Genre | null>([]);
+    const [genres, setGenres] = useState<Genre | null>(null);
     const [muted, setMuted] = useState(true);
     const [like, setLike] = useState(false);
 
@@ -126,9 +126,10 @@ function Modal() {
                                     <span className="text-[gray]">
                                         Genres:{" "}
                                     </span>
-                                    {genres
-                                        .map((genre) => genre.name)
-                                        .join(", ")}
+                                    {genres &&
+                                        genres
+                                            .map((genre) => genre.name)
+                                            .join(", ")}
                                 </div>
                                 <div>
                                     <span className="text-[gray]">
