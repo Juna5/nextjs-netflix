@@ -17,7 +17,7 @@ function Modal() {
     const [showModal, setShowModal] = useRecoilState(modalState);
     const [movie, setMovie] = useRecoilState(movieState);
     const [trailer, setTrailer] = useState("");
-    const [genres, setGenres] = useState<Genre | null>(null);
+    const [genres, setGenres] = useState<Genre[]>([]);
     const [muted, setMuted] = useState(true);
     const [like, setLike] = useState(false);
 
