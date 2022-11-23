@@ -19,7 +19,7 @@ interface IAuth {
     loading: boolean;
 }
 
-const AuthContext = createContext<Input>({
+const AuthContext = createContext<IAuth>({
     user: null,
     signUp: async () => {},
     signIn: async () => {},
