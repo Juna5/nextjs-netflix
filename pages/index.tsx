@@ -2,12 +2,14 @@ import Head from "next/head";
 import Header from "../components/Header";
 import Banner from "../components/Banner";
 import requests from "../utils/requests";
-import { Movie } from "../typings";
+import { Movie, Product } from "../typings";
 import Row from "../components/Row";
 import useAuth from "../hooks/useAuth";
 import { useRecoilValue } from "recoil";
 import { modalState } from "../atoms/modalAtom";
 import Modal from "../components/Modal";
+import Plans from "../components/Plans";
+import dataProducts from "../utils/products.json";
 
 export async function getServerSideProps() {
     const [
@@ -40,6 +42,7 @@ export async function getServerSideProps() {
             horrorMovies: horrorMovies.results,
             romanceMovies: romanceMovies.results,
             documentaries: documentaries.results,
+            products: dataProducts,
         },
     };
 }
@@ -52,6 +55,7 @@ interface Props {
     horrorMovies: Movie[];
     romanceMovies: Movie[];
     documentaries: Movie[];
+    products: Product[];
 }
 
 export default function Home({
@@ -63,13 +67,20 @@ export default function Home({
     horrorMovies,
     romanceMovies,
     documentaries,
+    products,
 }: Props) {
     const { loading } = useAuth();
     const showModal = useRecoilValue(modalState);
+    const subscription = false;
 
-    if (loading) return null;
+    if (loading || subscription === null) return null;
+    if (!subscription) return <Plans products={products} />;
     return (
-        <div className="relative h-screen bg-gradient-to-b from-gray-900/10 to-[#010511] lg:h-[140vh]">
+        <div
+            className={`relative h-screen bg-gradient-to-b from-gray-900/10 to-[#010511] lg:h-[140vh] ${
+                showModal && "!h-screen overflow-hidden"
+            }`}
+        >
             <Head>
                 <title>Home - Netflix</title>
                 <link rel="icon" href="/favicon.ico" />
