@@ -9,9 +9,13 @@ import { useRecoilValue } from "recoil";
 import { modalState } from "../atoms/modalAtom";
 import Modal from "../components/Modal";
 import Plans from "../components/Plans";
-import dataProducts from "../utils/products.json";
+import useSubscription from "../hooks/useSubscription";
+import { db } from "../firebash";
+import { collection, addDoc, getDocs } from "firebase/firestore";
+import { useEffect, useState } from "react";
 
 export async function getServerSideProps() {
+    const dbInstance = collection(db, "Product");
     const [
         netflixOriginals,
         trendingNow,
@@ -21,6 +25,7 @@ export async function getServerSideProps() {
         horrorMovies,
         romanceMovies,
         documentaries,
+        products,
     ] = await Promise.all([
         fetch(requests.fetchNetflixOriginals).then((res) => res.json()),
         fetch(requests.fetchTrending).then((res) => res.json()),
@@ -30,6 +35,10 @@ export async function getServerSideProps() {
         fetch(requests.fetchHorrorMovies).then((res) => res.json()),
         fetch(requests.fetchRomanceMovies).then((res) => res.json()),
         fetch(requests.fetchDocumentaries).then((res) => res.json()),
+        fetch(requests.fetchDocumentaries).then((res) => res.json()),
+        getDocs(dbInstance).then((data) => {
+            data.docs.map((item) => json({ ...item.data(), id: item.id }));
+        }),
     ]);
 
     return {
@@ -42,7 +51,7 @@ export async function getServerSideProps() {
             horrorMovies: horrorMovies.results,
             romanceMovies: romanceMovies.results,
             documentaries: documentaries.results,
-            products: dataProducts,
+            // products: getNotes,
         },
     };
 }
@@ -67,12 +76,27 @@ export default function Home({
     horrorMovies,
     romanceMovies,
     documentaries,
-    products,
-}: Props) {
-    const { loading } = useAuth();
+}: // products,
+Props) {
+    const { loading, user } = useAuth();
     const showModal = useRecoilValue(modalState);
     const subscription = false;
+    const [products, setProducts] = useState<any>([]);
 
+    // const dbInstance = collection(db, "Product");
+    // const getNotes = () => {
+    //     getDocs(dbInstance).then((data) => {
+    //         setProducts(
+    //             data.docs.map((item) => {
+    //                 return { ...item.data(), id: item.id };
+    //             })
+    //         );
+    //     });
+    // };
+
+    useEffect(() => {
+        getNotes();
+    }, []);
     if (loading || subscription === null) return null;
     if (!subscription) return <Plans products={products} />;
     return (

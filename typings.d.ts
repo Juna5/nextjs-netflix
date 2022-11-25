@@ -37,4 +37,5 @@ export interface Product {
     name: string;
     price: number;
     quality: string;
+    portability: boolean;
 }
