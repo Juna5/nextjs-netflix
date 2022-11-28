@@ -7,25 +7,48 @@ import { Product } from "../typings";
 import Loader from "./Loader";
 import Table from "./Table";
 import { useRouter } from "next/router";
-
+import { toast } from "react-toastify";
+import { addDoc, collection } from "firebase/firestore";
+import { db } from "../firebash";
 interface Props {
     products: Product[];
 }
 export default function Plans({ products }: Props) {
     const { logout, user } = useAuth();
-    const [selectedPlan, setSelectedPlan] = useState<Product>(products[2]);
+    const [selectedPlan, setSelectedPlan] = useState<Product>();
     const [isBillingLoading, setIsBillingLoading] = useState(false);
     const router = useRouter();
+    const dbRef = collection(db, "subscribes");
 
     const subscribeToPlan = () => {
-        console.log("foo");
-
         if (!user) return;
         setIsBillingLoading(true);
-        setTimeout(() => {
-            router.push("/payment");
-        }, 3000);
+        if (!selectedPlan) {
+            setTimeout(() => {
+                toast("Toast is good", {
+                    position: "top-center",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "dark",
+                    type: "error",
+                });
+                setIsBillingLoading(false);
+            }, 3000);
+        } else {
+            addDoc(dbRef, {
+                user_id: user.uid,
+                product_id: selectedPlan?.id,
+            });
+            setTimeout(() => {
+                window.location.reload();
+            }, 3000);
+        }
     };
+
     return (
         <div>
             <Head>
@@ -85,7 +108,7 @@ export default function Plans({ products }: Props) {
                     <Table products={products} selectedPlan={selectedPlan} />
 
                     <button
-                        disabled={!selectedPlan || isBillingLoading}
+                        disabled={isBillingLoading}
                         className={`mx-auto w-11/12 rounded bg-[#E50914] py-4 text-xl shadow hover:bg-[#f6121d] md:w-[420px] ${
                             isBillingLoading && "opacity-60"
                         }`}

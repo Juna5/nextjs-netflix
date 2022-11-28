@@ -10,7 +10,7 @@ import { modalState } from "../atoms/modalAtom";
 import Modal from "../components/Modal";
 import Plans from "../components/Plans";
 import useSubscription from "../hooks/useSubscription";
-import { db } from "../firebash";
+import { auth, db } from "../firebash";
 import { collection, addDoc, getDocs } from "firebase/firestore";
 import { useEffect, useState } from "react";
 
@@ -73,12 +73,13 @@ export default function Home({
 }: Props) {
     const { loading, user } = useAuth();
     const showModal = useRecoilValue(modalState);
-    const subscription = false;
+    const [subscription, setSubscription] = useState(false);
     const [products, setProducts] = useState<any>([]);
 
-    const dbInstance = collection(db, "Product");
-    const getNotes = () => {
-        getDocs(dbInstance).then((data) => {
+    const dbProduct = collection(db, "Product");
+    const dbSubscribes = collection(db, "subscribes");
+    const getProduct = () => {
+        getDocs(dbProduct).then((data) => {
             setProducts(
                 data.docs.map((item) => {
                     return { ...item.data(), id: item.id };
@@ -86,10 +87,22 @@ export default function Home({
             );
         });
     };
+    const getSubscriptions = () => {
+        getDocs(dbSubscribes).then((data) => {
+            console.log(
+                data.docs.map((item) => {
+                    if (item.data().user_id === user?.uid) {
+                        setSubscription(true);
+                    }
+                })
+            );
+        });
+    };
 
     useEffect(() => {
-        getNotes();
-    }, []);
+        getProduct();
+        getSubscriptions();
+    });
 
     if (loading || subscription === null) return null;
     if (!subscription) return <Plans products={products} />;
