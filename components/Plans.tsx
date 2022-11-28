@@ -12,16 +12,19 @@ interface Props {
     products: Product[];
 }
 export default function Plans({ products }: Props) {
-    // console.log("fo", products);
-
     const { logout, user } = useAuth();
-    // const [selectedPlan, setSelectedPlan] = useState<Product>(products[2]);
+    const [selectedPlan, setSelectedPlan] = useState<Product>(products[2]);
     const [isBillingLoading, setIsBillingLoading] = useState(false);
     const router = useRouter();
 
     const subscribeToPlan = () => {
+        console.log("foo");
+
         if (!user) return;
         setIsBillingLoading(true);
+        setTimeout(() => {
+            router.push("/payment");
+        }, 3000);
     };
     return (
         <div>
@@ -64,7 +67,7 @@ export default function Plans({ products }: Props) {
                 </ul>
 
                 <div className="mt-4 flex flex-col space-y-4">
-                    {/* <div className="flex w-full items-center justify-center self-end md:w-3/5">
+                    <div className="flex w-full items-center justify-center self-end md:w-3/5">
                         {products.map((product) => (
                             <div
                                 key={product.id}
@@ -79,9 +82,9 @@ export default function Plans({ products }: Props) {
                             </div>
                         ))}
                     </div>
-                    <Table products={products} selectedPlan={selectedPlan} /> */}
+                    <Table products={products} selectedPlan={selectedPlan} />
 
-                    {/* <button
+                    <button
                         disabled={!selectedPlan || isBillingLoading}
                         className={`mx-auto w-11/12 rounded bg-[#E50914] py-4 text-xl shadow hover:bg-[#f6121d] md:w-[420px] ${
                             isBillingLoading && "opacity-60"
@@ -93,7 +96,7 @@ export default function Plans({ products }: Props) {
                         ) : (
                             "Subscribe"
                         )}
-                    </button> */}
+                    </button>
                 </div>
             </main>
         </div>
