@@ -102,7 +102,7 @@ export default function Home({
     useEffect(() => {
         getProduct();
         getSubscriptions();
-    });
+    }, []);
 
     if (loading || subscription === null) return null;
     if (!subscription) return <Plans products={products} />;
