@@ -39,3 +39,9 @@ export interface Product {
     quality: string;
     portability: boolean;
 }
+
+export interface Subscription {
+    id: number;
+    product_id: string;
+    user: string;
+}

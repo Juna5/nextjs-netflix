@@ -6,13 +6,15 @@ import { Movie, Product } from "../typings";
 import Row from "../components/Row";
 import useAuth from "../hooks/useAuth";
 import { useRecoilValue } from "recoil";
-import { modalState } from "../atoms/modalAtom";
+import { modalState, movieState } from "../atoms/modalAtom";
 import Modal from "../components/Modal";
 import Plans from "../components/Plans";
 import useSubscription from "../hooks/useSubscription";
-import { auth, db } from "../firebash";
+import { auth, db } from "../firebase";
 import { collection, addDoc, getDocs } from "firebase/firestore";
 import { useEffect, useState } from "react";
+import useList from "../hooks/useList";
+import useProduct from "../hooks/useProduct";
 
 export async function getServerSideProps() {
     const [
@@ -73,36 +75,10 @@ export default function Home({
 }: Props) {
     const { loading, user } = useAuth();
     const showModal = useRecoilValue(modalState);
-    const [subscription, setSubscription] = useState(false);
-    const [products, setProducts] = useState<any>([]);
-
-    const dbProduct = collection(db, "Product");
-    const dbSubscribes = collection(db, "subscribes");
-    const getProduct = () => {
-        getDocs(dbProduct).then((data) => {
-            setProducts(
-                data.docs.map((item) => {
-                    return { ...item.data(), id: item.id };
-                })
-            );
-        });
-    };
-    const getSubscriptions = () => {
-        getDocs(dbSubscribes).then((data) => {
-            console.log(
-                data.docs.map((item) => {
-                    if (item.data().user_id === user?.uid) {
-                        setSubscription(true);
-                    }
-                })
-            );
-        });
-    };
-
-    useEffect(() => {
-        getProduct();
-        getSubscriptions();
-    }, []);
+    const subscription = useSubscription(user);
+    const products = useProduct();
+    const movie = useRecoilValue(movieState);
+    const list = useList(user?.uid);
 
     if (loading || subscription === null) return null;
     if (!subscription) return <Plans products={products} />;
@@ -123,6 +99,7 @@ export default function Home({
                     <Row title="Trending Now" movies={trendingNow} />
                     <Row title="Top Rated" movies={topRated} />
                     <Row title="Action Movies" movies={actionMovies} />
+                    {list.length > 0 && <Row title="My List" movies={list} />}
                     <Row title="Comedy Movies" movies={comedyMovies} />
                     <Row title="Horror Movies" movies={horrorMovies} />
                     <Row title="Romance Movies" movies={romanceMovies} />

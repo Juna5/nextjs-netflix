@@ -1,9 +1,10 @@
 import { CheckIcon } from "@heroicons/react/outline";
+import { DocumentData } from "firebase/firestore";
 import { Product } from "../typings";
 
 interface Props {
-    products: Product[];
-    selectedPlan: Product | null;
+    products: Product[] | DocumentData[];
+    selectedPlan: Product | DocumentData | undefined;
 }
 
 function Table({ products, selectedPlan }: Props) {

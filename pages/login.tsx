@@ -3,7 +3,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import useAuth from "../hooks/useAuth";
-import { auth } from "../firebash";
+import { auth } from "../firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/router";
 

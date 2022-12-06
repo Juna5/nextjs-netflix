@@ -4,22 +4,48 @@ import {
     VolumeOffIcon,
     VolumeUpIcon,
     XIcon,
+    CheckIcon,
 } from "@heroicons/react/outline";
 import { ThumbUpIcon as ThumbUpIconSolid } from "@heroicons/react/solid";
 import MuiModal from "@mui/material/Modal";
 import { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
 import { modalState, movieState } from "../atoms/modalAtom";
-import { Element, Genre } from "../typings";
+import { Element, Genre, Movie } from "../typings";
 import ReactPlayer from "react-player";
 import { FaPlay } from "react-icons/fa";
+import {
+    collection,
+    deleteDoc,
+    doc,
+    DocumentData,
+    onSnapshot,
+    setDoc,
+} from "firebase/firestore";
+import { db } from "../firebase";
+import useAuth from "../hooks/useAuth";
+import toast, { Toaster } from "react-hot-toast";
+
 function Modal() {
+    const { user } = useAuth();
     const [showModal, setShowModal] = useRecoilState(modalState);
     const [movie, setMovie] = useRecoilState(movieState);
     const [trailer, setTrailer] = useState("");
     const [genres, setGenres] = useState<Genre[]>([]);
     const [muted, setMuted] = useState(true);
     const [like, setLike] = useState(false);
+    const [addedToList, setAddedToList] = useState(false);
+    const [movies, setMovies] = useState<DocumentData[] | Movie[]>([]);
+
+    const toastStyle = {
+        background: "white",
+        color: "black",
+        fontWeight: "bold",
+        fontSize: "16px",
+        padding: "15px",
+        borderRadius: "9999px",
+        maxWidth: "1000px",
+    };
 
     useEffect(() => {
         if (!movie) return;
@@ -48,6 +74,64 @@ function Modal() {
         }
         fetchMovie();
     }, [movie]);
+    // Find all the movies in the user's list
+    useEffect(() => {
+        if (user) {
+            return onSnapshot(
+                collection(db, "customers", user.uid, "myList"),
+                (snapshot) => setMovies(snapshot.docs)
+            );
+        }
+    }, [db, movie?.id]);
+
+    // Check if the movie is already in the user's list
+    useEffect(
+        () =>
+            setAddedToList(
+                movies.findIndex((result) => result.data().id === movie?.id) !==
+                    -1
+            ),
+        [movies]
+    );
+
+    const handleList = async () => {
+        if (addedToList) {
+            await deleteDoc(
+                doc(db, "customers", user!.uid, "myList", movie?.id.toString()!)
+            );
+            toast(
+                `${
+                    movie?.title || movie?.original_name
+                } has been removed from My List`,
+                {
+                    duration: 8000,
+                    style: toastStyle,
+                }
+            );
+        } else {
+            await setDoc(
+                doc(
+                    db,
+                    "customers",
+                    user!.uid,
+                    "myList",
+                    movie?.id.toString()!
+                ),
+                {
+                    ...movie,
+                }
+            );
+            toast(
+                `${
+                    movie?.title || movie?.original_name
+                } has been added to My List.`,
+                {
+                    duration: 8000,
+                    style: toastStyle,
+                }
+            );
+        }
+    };
 
     const handleClose = () => {
         setShowModal(false);
@@ -59,6 +143,7 @@ function Modal() {
             className="fixed !top-7 left-0 right-0 z-50 mx-auto w-full max-w-5xl overflow-hidden overflow-y-scroll rounded-md scrollbar-hide"
         >
             <>
+                <Toaster position="bottom-center" />
                 <button
                     onClick={handleClose}
                     className="modal-button absolute right-5 top-5 !z-40 h-9 w-9 border-none bg-[#181818] hover:bg-[#181818]"
@@ -80,8 +165,15 @@ function Modal() {
                                 <FaPlay className="h-7 w-7 text-black" />
                                 Play
                             </button>
-                            <button className="modal-button">
-                                <PlusIcon className="w-7 h-7" />
+                            <button
+                                className="modal-button"
+                                onClick={handleList}
+                            >
+                                {addedToList ? (
+                                    <CheckIcon className="w-7 h-7" />
+                                ) : (
+                                    <PlusIcon className="w-7 h-7" />
+                                )}
                             </button>
                             <button
                                 className="modal-button"

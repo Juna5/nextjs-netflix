@@ -7,45 +7,45 @@ import { Product } from "../typings";
 import Loader from "./Loader";
 import Table from "./Table";
 import { useRouter } from "next/router";
-import { toast } from "react-toastify";
-import { addDoc, collection } from "firebase/firestore";
-import { db } from "../firebash";
+import {
+    addDoc,
+    collection,
+    doc,
+    DocumentData,
+    setDoc,
+} from "firebase/firestore";
+import { db } from "../firebase";
+import toast, { Toaster } from "react-hot-toast";
 interface Props {
-    products: Product[];
+    products: Product[] | DocumentData[];
 }
 export default function Plans({ products }: Props) {
     const { logout, user } = useAuth();
-    const [selectedPlan, setSelectedPlan] = useState<Product>();
+    const [selectedPlan, setSelectedPlan] = useState<Product | DocumentData>();
     const [isBillingLoading, setIsBillingLoading] = useState(false);
-    const router = useRouter();
-    const dbRef = collection(db, "subscribes");
-
-    const subscribeToPlan = () => {
+    const toastStyle = {
+        background: "white",
+        color: "black",
+        fontWeight: "bold",
+        fontSize: "16px",
+        padding: "15px",
+        borderRadius: "9999px",
+        maxWidth: "1000px",
+    };
+    const subscribeToPlan = async () => {
         if (!user) return;
         setIsBillingLoading(true);
         if (!selectedPlan) {
-            setTimeout(() => {
-                toast("Toast is good", {
-                    position: "top-center",
-                    autoClose: 5000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "dark",
-                    type: "error",
-                });
-                setIsBillingLoading(false);
-            }, 3000);
+            toast(`Belum Pilih paket`, {
+                duration: 8000,
+                style: toastStyle,
+            });
+            setIsBillingLoading(false);
         } else {
-            addDoc(dbRef, {
+            await addDoc(collection(db, "subscribes"), {
                 user_id: user.uid,
                 product_id: selectedPlan?.id,
             });
-            setTimeout(() => {
-                window.location.reload();
-            }, 3000);
         }
     };
 
@@ -55,6 +55,8 @@ export default function Plans({ products }: Props) {
                 <title>Netflix</title>
                 <link rel="icon" href="/icon.ico" />
             </Head>
+            <Toaster position="bottom-center" />
+
             <header className="border-b border-white/10 bg-[#141414]">
                 <Link href={"/"}>
                     <img
